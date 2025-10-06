@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddScreen extends StatefulWidget {
   final Map<String, dynamic>? initialEntry;
@@ -146,14 +148,29 @@ class _AddScreenState extends State<AddScreen> {
     if (picked != null) setState(() => _date = picked);
   }
 
-  void _save() {
-    final Map<String, dynamic> result = {
+  void _save() async {
+    if (_controller.text.trim().isEmpty) {
+      return;
+    }
+
+    final Map<String, dynamic> newEntry = {
       'date': _date.millisecondsSinceEpoch,
       'text': _controller.text.trim(),
       'emojiIndex': _selectedEmoji,
       'sliderValue': _sliderValue,
       'imagePath': _pickedImage?.path,
     };
-    Navigator.pop(context, result);
+
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString('diary_entries');
+    List<dynamic> entriesList = data != null ? jsonDecode(data) : [];
+
+    entriesList.add(newEntry);
+
+    await prefs.setString('diary_entries', jsonEncode(entriesList));
+
+    if (mounted) {
+      Navigator.pop(context, newEntry);
+    }
   }
 }

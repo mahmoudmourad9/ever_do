@@ -20,5 +20,11 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/logo.png
-    - assets/images/write.png
+    - assets/images/
+  fonts:
+    - family: UthmanTNB
+      fonts:
+        - asset: assets/font/UthmanTNB_v2-0.ttf
+    - family: jomhuria
+      fonts:
+        - asset: assets/font/jomhuria-regular-full-org.ttf

@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:everdo_app/widget/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'add_screen.dart';
-import 'settings_screen.dart';
 
 class DiaryEntry {
   DateTime date;
@@ -42,15 +41,15 @@ class DiaryEntry {
 }
 
 class DiaryScreen extends StatefulWidget {
-  final VoidCallback? onToggleTheme; 
+  final VoidCallback? onToggleTheme;
 
-  const DiaryScreen({super.key, this.onToggleTheme}); 
+  const DiaryScreen({super.key, this.onToggleTheme});
 
   @override
-  State<DiaryScreen> createState() => _DiaryScreenState();
+  DiaryScreenState createState() => DiaryScreenState();
 }
 
-class _DiaryScreenState extends State<DiaryScreen> {
+class DiaryScreenState extends State<DiaryScreen> {
   List<DiaryEntry> diaryEntries = [];
 
   @override
@@ -59,13 +58,20 @@ class _DiaryScreenState extends State<DiaryScreen> {
     _loadDiary();
   }
 
+  void refreshEntries() {
+    _loadDiary();
+  }
+
   Future<void> _loadDiary() async {
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getString('diary_entries');
     if (data != null) {
       final List decoded = jsonDecode(data);
-      diaryEntries = decoded.map((e) => DiaryEntry.fromMap(e)).toList();
-      setState(() {});
+      diaryEntries = decoded.map((e) => DiaryEntry.fromMap(e)).toList()
+        ..sort((a, b) => b.date.compareTo(a.date));
+      if (mounted) {
+        setState(() {});
+      }
     }
   }
 
@@ -90,51 +96,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: const Color(0xFF006C8D),
-                      child: IconButton(
-                        icon: const Icon(Icons.settings, color: Colors.white),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                          );
-                        },
-                      ),
-                    ),
-                    const Text(
-                      'اليوميات',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    Row(
-                      children: [
-                        // زر تغيير الثيم
-                        CircleAvatar(
-                          backgroundColor: const Color(0xFF006C8D),
-                          child: IconButton(
-                            icon: const Icon(Icons.brightness_6, color: Colors.white),
-                            onPressed: widget.onToggleTheme, 
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        CircleAvatar(
-                          backgroundColor: const Color(0xFF006C8D),
-                          child: IconButton(
-                            icon: const Icon(Icons.menu_book, color: Colors.white),
-                            onPressed: () {},
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+ costmAppbar( titel: 'اليوميات', rightIcon: Icons.note_alt_outlined,),
               Expanded(
                 child: diaryEntries.isEmpty ? _buildEmpty() : _buildList(),
               ),
@@ -142,55 +104,15 @@ class _DiaryScreenState extends State<DiaryScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF004A63),
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddScreen()),
-          );
-          if (result != null && result is Map<String, dynamic>) {
-            final entry = DiaryEntry(
-              date: result['date'] is int
-                  ? DateTime.fromMillisecondsSinceEpoch(result['date'])
-                  : result['date'],
-              text: result['text'],
-              emojiIndex: result['emojiIndex'],
-              sliderValue: (result['sliderValue'] as num).toDouble(),
-              imagePath: result['imagePath'],
-            );
-            diaryEntries.insert(0, entry);
-            await _saveDiary();
-            setState(() {});
-          }
-        },
-        child: const Icon(Icons.add, color: Colors.white, size: 32),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        color: const Color(0xFF004A63),
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
-        child: SizedBox(
-          height: 56,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: const [
-              Icon(Icons.calendar_today, color: Colors.white),
-              Icon(Icons.menu_book, color: Colors.white),
-            ],
-          ),
-        ),
-      ),
     );
   }
-
+// لما تكون البيانات مش  موجودة أو غير مُضافة في الشاشة.
   Widget _buildEmpty() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.edit_note, size: 120, color: Colors.black54),
+        children:  [
+Image.asset('assets/images/write.png',height: 120,),
           SizedBox(height: 10),
           Text('دون يومياتك',
               style: TextStyle(fontSize: 20, color: Colors.black54)),
@@ -209,7 +131,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => _DetailScreen(entry: e)),
+              MaterialPageRoute(builder: (_) => DetailScreen(entry: e)),
             );
           },
           onLongPress: () async {
@@ -276,9 +198,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 }
 
-class _DetailScreen extends StatelessWidget {
+class DetailScreen extends StatelessWidget {
   final DiaryEntry entry;
-  const _DetailScreen({required this.entry});
+  const DetailScreen({required this.entry, super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -56,6 +56,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             Switch(
               value: isDarkMode,
+              // ignore: deprecated_member_use
               activeColor: const Color(0xFF004A63),
               onChanged: (value) async {
                 setState(() {
