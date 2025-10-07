@@ -1,6 +1,6 @@
-import 'package:everdo_app/screen/details/addDiary_screen.dart';
+import 'package:everdo_app/screen/diary/addDiary_screen.dart';
 import 'package:everdo_app/screen/notes/add_note_screen.dart';
-import 'package:everdo_app/screen/details/diary_screen.dart';
+import 'package:everdo_app/screen/diary/diary_screen.dart';
 import 'package:everdo_app/screen/notes/notes_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -16,8 +16,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
   late final List<Widget> _pages;
 
-  final GlobalKey<DiaryScreenState> _diaryScreenKey = GlobalKey<DiaryScreenState>();
-  final GlobalKey<NotesScreenState> _notesScreenKey = GlobalKey<NotesScreenState>();
+  final GlobalKey<DiaryScreenState> _diaryScreenKey =
+      GlobalKey<DiaryScreenState>();
+  final GlobalKey<NotesScreenState> _notesScreenKey =
+      GlobalKey<NotesScreenState>();
 
   @override
   void initState() {
@@ -42,23 +44,40 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         backgroundColor: const Color(0xFF004A63),
         onPressed: () async {
           if (_currentIndex == 0) {
-            final result = await Navigator.push<Map<String, dynamic>>(
+            // المنطق الذكي للتحقق من وجود يومية بتاريخ اليوم
+            final diaryState = _diaryScreenKey.currentState;
+            if (diaryState == null) return;
+
+            final now = DateTime.now();
+            DiaryEntry? todayEntry;
+
+            // البحث عن يومية مسجلة بتاريخ اليوم
+            try {
+              todayEntry = diaryState.diaryEntries.firstWhere((entry) =>
+                  entry.date.year == now.year &&
+                  entry.date.month == now.month &&
+                  entry.date.day == now.day);
+            } catch (e) {
+              todayEntry = null;
+            }
+
+            // الانتقال إلى شاشة الإضافة أو التعديل
+            await Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const AddScreen()),
+              MaterialPageRoute(
+                  builder: (_) => AddScreen(initialEntry: todayEntry?.toMap())),
             );
 
-            if (result != null && mounted) {
-              _diaryScreenKey.currentState?.refreshEntries();
-            }
+            // تحديث القائمة بعد العودة
+            diaryState.refreshEntries();
+
           } else if (_currentIndex == 1) {
-            final result = await Navigator.push<Map<String, dynamic>>(
+            // منطق الملاحظات
+            await Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const AddNoteScreen()),
             );
-
-            if (result != null && mounted) {
-              _notesScreenKey.currentState?.refreshNotes();
-            }
+            _notesScreenKey.currentState?.refreshNotes();
           }
         },
         child: const Icon(Icons.add, color: Colors.white, size: 32),
@@ -74,13 +93,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               IconButton(
-                icon: const Icon(Icons.menu_book,size: 32,),
+                icon: const Icon(
+                  Icons.menu_book,
+                  size: 32,
+                ),
                 color: _currentIndex == 0 ? Colors.white : Colors.white54,
                 onPressed: () => _onTabTapped(0),
                 tooltip: 'اليوميات',
               ),
               IconButton(
-                icon: const Icon(Icons.note_alt_outlined,size: 32),
+                icon: const Icon(Icons.note_alt_outlined, size: 32),
                 color: _currentIndex == 1 ? Colors.white : Colors.white54,
                 onPressed: () => _onTabTapped(1),
                 tooltip: 'الملاحظات',

@@ -1,4 +1,3 @@
-import 'package:everdo_app/screen/notes/notes_screen.dart';
 import 'package:flutter/material.dart';
 
 class costmAppbar extends StatelessWidget {
@@ -25,6 +24,7 @@ class costmAppbar extends StatelessWidget {
             child: IconButton(
               icon: const Icon(Icons.settings, color: Colors.white),
               onPressed: () {
+                
               },
             ),
           ),

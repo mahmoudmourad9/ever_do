@@ -206,32 +206,40 @@ class DetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تفاصيل اليومية'),
+        
+        centerTitle: true,
+        title: const Text('تفاصيل اليومية',style: TextStyle(color: Colors.white,)),
         backgroundColor: const Color(0xFF004A63),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            if (entry.imagePath != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(File(entry.imagePath!),
-                    width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.cover),
-              ),
-            const SizedBox(height: 16),
+          
             Text(
               '${entry.date.day}/${entry.date.month}/${entry.date.year}',
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
-            const SizedBox(height: 8),
-            Text(entry.text, style: const TextStyle(fontSize: 18)),
-            const SizedBox(height: 8),
-            Text('المزاج: ${_emojiFromIndex(entry.emojiIndex)}',
+               const SizedBox(height: 8),
+            Text(' ${_emojiFromIndex(entry.emojiIndex)}:شعور اليوم',
                 style: const TextStyle(fontSize: 22)),
+                   const SizedBox(height: 8),
+            if (entry.imagePath != null)
+              ClipRRect(
+                
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(File(entry.imagePath!),
+                    width: double.infinity,
+                    height: 400,
+                    fit: BoxFit.cover),
+              ),
+            const SizedBox(height: 16),
+            Divider(thickness: 3,),
+            
+            const SizedBox(height: 8),
+            Text(entry.text, style: const TextStyle(fontSize: 18,)),
+         
           ],
         ),
       ),

@@ -19,7 +19,7 @@ class DetailsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (entry.imagePath != null)
                 ClipRRect(
@@ -27,7 +27,7 @@ class DetailsScreen extends StatelessWidget {
                   child: Image.file(
                     File(entry.imagePath!),
                     width: double.infinity,
-                    height: 220,
+                    height: 400,
                     fit: BoxFit.cover,
                   ),
                 ),
