@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:everdo_app/models/diary_entry_model.dart';
+import 'package:everdo_app/screen/diary/details_screen.dart';
 import 'package:everdo_app/widget/AppBar%20.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -98,7 +99,7 @@ Image.asset('assets/images/write.png',height: 120,),
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => DetailScreen(entry: e)),
+              MaterialPageRoute(builder: (_) => DetailsScreen(entry: e)),
             );
           },
           onLongPress: () async {
@@ -165,57 +166,3 @@ Image.asset('assets/images/write.png',height: 120,),
   }
 }
 
-class DetailScreen extends StatelessWidget {
-  final DiaryEntry entry;
-  const DetailScreen({required this.entry, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        
-        centerTitle: true,
-        title: const Text('تفاصيل اليومية',style: TextStyle(color: Colors.white,)),
-        backgroundColor: const Color(0xFF004A63),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-          
-            Text(
-              '${entry.date.day}/${entry.date.month}/${entry.date.year}',
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-               const SizedBox(height: 8),
-            Text(' ${_emojiFromIndex(entry.emojiIndex)}:شعور اليوم',
-                style: const TextStyle(fontSize: 22)),
-                   const SizedBox(height: 8),
-            if (entry.imagePath != null)
-              ClipRRect(
-                
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(File(entry.imagePath!),
-                    width: double.infinity,
-                    height: 400,
-                    fit: BoxFit.cover),
-              ),
-            const SizedBox(height: 16),
-            Divider(thickness: 3,),
-            
-            const SizedBox(height: 8),
-            Text(entry.text, style: const TextStyle(fontSize: 18,)),
-         
-          ],
-        ),
-      ),
-    );
-  }
-
-  static String _emojiFromIndex(int i) {
-    const list = ['😡', '☹️', '🙂', '😄', '😍'];
-    if (i < 0 || i >= list.length) return '🙂';
-    return list[i];
-  }
-}

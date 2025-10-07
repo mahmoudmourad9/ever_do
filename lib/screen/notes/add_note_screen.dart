@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:everdo_app/Providers/theme_provide.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 class AddNoteScreen extends StatefulWidget {
   final Map<String, dynamic>? initialNote;
@@ -27,18 +29,54 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     }
   }
 
+  void _save() async {
+    if (_titleController.text.isEmpty || _textController.text.isEmpty) {
+      return;
+    }
+    final Map<String, dynamic> newNote = {
+      'date': _date.millisecondsSinceEpoch,
+      'title': _titleController.text.trim(),
+      'text': _textController.text.trim(),
+    };
+
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString('notes');
+    List<dynamic> notesList = data != null ? jsonDecode(data) : [];
+
+    if (widget.initialNote != null) {
+      notesList
+          .removeWhere((note) => note['date'] == widget.initialNote!['date']);
+    }
+
+    notesList.add(newNote);
+
+    await prefs.setString('notes', jsonEncode(notesList));
+
+    if (mounted) {
+      Navigator.pop(context, newNote);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
+
+    final Color primaryTextColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final Color inputFillColor =
+        isDarkMode ? Colors.grey.shade800 : Colors.black12;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF004A63),
         elevation: 0,
-        title: const Text('إضافة ملاحظة',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+            widget.initialNote != null ? 'تعديل ملاحظة' : 'إضافة ملاحظة',
+            style: Theme.of(context).textTheme.headlineSmall),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -51,48 +89,55 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('${_date.day} / ${_date.month} / ${_date.year}',
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w500)),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: primaryTextColor,
+                    )),
                 IconButton(
-                    icon: const Icon(Icons.calendar_month,
-                        color: Color(0xFF004A63)),
+                    icon: Icon(Icons.calendar_month,
+                        color: Theme.of(context).primaryColor),
                     onPressed: _pickDate),
               ],
             ),
             const SizedBox(height: 25),
-            const Text('عنوان الملاحظة',
+            Text('عنوان الملاحظة',
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87)),
+                    color: primaryTextColor)),
             const SizedBox(height: 10),
             TextField(
               controller: _titleController,
+              style: TextStyle(color: primaryTextColor),
               decoration: InputDecoration(
                 hintText: 'اكتب العنوان هنا',
-                hintStyle: const TextStyle(color: Colors.black38),
+                hintStyle:
+                    TextStyle(color: isDarkMode ? Colors.grey : Colors.black38),
                 filled: true,
-                fillColor: Colors.black12,
+                fillColor: inputFillColor,
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none),
               ),
             ),
             const SizedBox(height: 25),
-            const Text('المحتوى',
+            Text('المحتوى',
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87)),
+                    color: primaryTextColor)),
             const SizedBox(height: 10),
             TextField(
               controller: _textController,
               maxLines: 8,
+              style: TextStyle(color: primaryTextColor),
               decoration: InputDecoration(
                 hintText: 'اكتب ملاحظتك هنا...',
-                hintStyle: const TextStyle(color: Colors.black38),
+                hintStyle:
+                    TextStyle(color: isDarkMode ? Colors.grey : Colors.black38),
                 filled: true,
-                fillColor: Colors.black12,
+                fillColor: inputFillColor,
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none),
@@ -103,7 +148,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF004A63),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
@@ -122,33 +168,26 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
 
   Future<void> _pickDate() async {
     final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: _date,
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2100));
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context).primaryColor,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
     if (picked != null) setState(() => _date = picked);
-  }
-
-  void _save() async {
-    if (_titleController.text.isEmpty || _textController.text.isEmpty) {
-      return;
-    }
-    final Map<String, dynamic> newNote = {
-      'date': _date.millisecondsSinceEpoch,
-      'title': _titleController.text.trim(),
-      'text': _textController.text.trim(),
-    };
-
-    final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getString('notes');
-    List<dynamic> notesList = data != null ? jsonDecode(data) : [];
-
-    notesList.add(newNote);
-
-    await prefs.setString('notes', jsonEncode(notesList));
-
-    if (mounted) {
-      Navigator.pop(context, newNote);
-    }
   }
 }

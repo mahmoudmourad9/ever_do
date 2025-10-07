@@ -1,3 +1,4 @@
+import 'package:everdo_app/models/diary_entry_model.dart';
 import 'package:everdo_app/screen/diary/addDiary_screen.dart';
 import 'package:everdo_app/screen/notes/add_note_screen.dart';
 import 'package:everdo_app/screen/diary/diary_screen.dart';
@@ -46,14 +47,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         backgroundColor: const Color(0xFF004A63),
         onPressed: () async {
           if (_currentIndex == 0) {
-            // المنطق الذكي للتحقق من وجود يومية بتاريخ اليوم
             final diaryState = _diaryScreenKey.currentState;
             if (diaryState == null) return;
 
             final now = DateTime.now();
             DiaryEntry? todayEntry;
 
-            // البحث عن يومية مسجلة بتاريخ اليوم
             try {
               todayEntry = diaryState.diaryEntries.firstWhere((entry) =>
                   entry.date.year == now.year &&
@@ -63,18 +62,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               todayEntry = null;
             }
 
-            // الانتقال إلى شاشة الإضافة أو التعديل
             await Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (_) => AddScreen(initialEntry: todayEntry?.toMap())),
             );
 
-            // تحديث القائمة بعد العودة
             diaryState.refreshEntries();
-
           } else if (_currentIndex == 1) {
-            // منطق الملاحظات
             await Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const AddNoteScreen()),

@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:everdo_app/Providers/theme_provide.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 class AddScreen extends StatefulWidget {
   final Map<String, dynamic>? initialEntry;
@@ -80,8 +82,8 @@ class _AddScreenState extends State<AddScreen> {
     };
 
     if (widget.initialEntry != null) {
-      entriesList
-          .removeWhere((entry) => entry['date'] == widget.initialEntry!['date']);
+      entriesList.removeWhere(
+          (entry) => entry['date'] == widget.initialEntry!['date']);
     }
 
     entriesList.add(newEntry);
@@ -95,16 +97,26 @@ class _AddScreenState extends State<AddScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
+
+    final Color cardColor =
+        isDarkMode ? Theme.of(context).colorScheme.surface : Colors.white;
+    final Color inputFillColor =
+        isDarkMode ? Colors.grey.shade800 : Colors.black12;
+    final Color primaryTextColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF004A63),
         elevation: 0,
-        title: Text(widget.initialEntry != null ? 'تعديل اليومية' : 'إضافة يومية',
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+            widget.initialEntry != null ? 'تعديل اليومية' : 'إضافة يومية',
+            style: Theme.of(context).textTheme.headlineSmall),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -117,25 +129,29 @@ class _AddScreenState extends State<AddScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('${_date.day} / ${_date.month} / ${_date.year}',
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w500)),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: primaryTextColor,
+                    )),
                 IconButton(
-                    icon: const Icon(Icons.calendar_month,
-                        color: Color(0xFF004A63)),
+                    icon: Icon(Icons.calendar_month,
+                        color: Theme.of(context).primaryColor),
                     onPressed: _pickDate),
               ],
             ),
             const SizedBox(height: 20),
-            const Text('شعورك اليوم',
+            Text('شعورك اليوم',
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87)),
+                    color: primaryTextColor)),
             const SizedBox(height: 10),
             Card(
               elevation: 3,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
+              color: cardColor,
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12.0, vertical: 15),
@@ -157,29 +173,33 @@ class _AddScreenState extends State<AddScreen> {
                     const SizedBox(height: 10),
                     Slider(
                         value: _sliderValue,
+                        activeColor: Theme.of(context).primaryColor,
                         onChanged: (v) => setState(() => _sliderValue = v)),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            const Text('إضافة صورة',
+            Text('إضافة صورة',
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87)),
+                    color: primaryTextColor)),
             const SizedBox(height: 10),
             GestureDetector(
               onTap: _pickImage,
               child: Container(
                 height: 130,
                 decoration: BoxDecoration(
-                    color: Colors.black12,
+                    color: inputFillColor,
                     borderRadius: BorderRadius.circular(10)),
                 child: _pickedImage == null
-                    ? const Center(
+                    ? Center(
                         child: Text('أضف صورة...',
-                            style: TextStyle(color: Colors.black45)))
+                            style: TextStyle(
+                                color: isDarkMode
+                                    ? Colors.white54
+                                    : Colors.black45)))
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Image.file(_pickedImage!,
@@ -189,20 +209,22 @@ class _AddScreenState extends State<AddScreen> {
               ),
             ),
             const SizedBox(height: 25),
-            const Text('اليومية',
+            Text('اليومية',
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87)),
+                    color: primaryTextColor)),
             const SizedBox(height: 10),
             TextField(
               controller: _controller,
               maxLines: 5,
+              style: TextStyle(color: primaryTextColor),
               decoration: InputDecoration(
                 hintText: 'ما الذي تريد إضافته اليوم',
-                hintStyle: const TextStyle(color: Colors.black38),
+                hintStyle:
+                    TextStyle(color: isDarkMode ? Colors.grey : Colors.black38),
                 filled: true,
-                fillColor: Colors.black12,
+                fillColor: inputFillColor,
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none),
@@ -213,15 +235,18 @@ class _AddScreenState extends State<AddScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF004A63),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: _save,
                 child: const Text('حفظ',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    )),
               ),
             ),
           ]),
@@ -244,10 +269,26 @@ class _AddScreenState extends State<AddScreen> {
 
   Future<void> _pickDate() async {
     final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: _date,
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2100));
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context).primaryColor,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
     if (picked != null) setState(() => _date = picked);
   }
 }

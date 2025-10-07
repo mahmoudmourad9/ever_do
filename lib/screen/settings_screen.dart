@@ -1,79 +1,73 @@
+import 'package:everdo_app/Providers/theme_provide.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
-  final Function(bool)? onThemeChanged;
-  const SettingsScreen({super.key, this.onThemeChanged});
+  const SettingsScreen({super.key, required onThemeChanged});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool isDarkMode = false;
   String selectedLanguage = 'العربية';
 
   @override
   void initState() {
     super.initState();
-    _loadSettings();
+    _loadLanguage();
   }
 
-  Future<void> _loadSettings() async {
+  Future<void> _loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      isDarkMode = prefs.getBool('isDarkMode') ?? false;
       selectedLanguage = prefs.getString('language') ?? 'العربية';
     });
   }
 
-  Future<void> _saveSettings() async {
+  Future<void> _saveLanguage() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isDarkMode', isDarkMode);
     await prefs.setString('language', selectedLanguage);
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF004A63),
-        title: const Text(
+        backgroundColor: Theme.of(context).primaryColor,
+        title: Text(
           'الإعدادات',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(color: Colors.white),
         ),
         centerTitle: true,
       ),
-      backgroundColor: isDarkMode ? Colors.black : const Color(0xFFEAF9FC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'الوضع الداكن',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
             Switch(
               value: isDarkMode,
-             
-              activeColor: const Color(0xFF004A63),
-              onChanged: (value) async {
-                setState(() {
-                  isDarkMode = value;
-                });
-                await _saveSettings();
-                widget.onThemeChanged?.call(value); 
+              activeColor: Theme.of(context).primaryColor,
+              onChanged: (value) {
+                themeProvider.toggleTheme(value);
               },
             ),
             const SizedBox(height: 24),
-            const Text(
-              'اللغة',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              // ...
               decoration: BoxDecoration(
                 color: isDarkMode ? Colors.grey[800] : Colors.white,
                 borderRadius: BorderRadius.circular(8),
@@ -95,7 +89,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   setState(() {
                     selectedLanguage = value!;
                   });
-                  await _saveSettings();
+                  await _saveLanguage();
                 },
               ),
             ),
