@@ -32,17 +32,17 @@ class SplashPage extends StatelessWidget {
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  Transform.rotate(
-                    angle: 0.01,
-                    child: Container(
-                      height: 46,
-                      width: 270,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
+                  // Transform.rotate(
+                  //   angle: 0.01,
+                  //   child: Container(
+                  //     height: 46,
+                  //     width: 270,
+                  //     decoration: BoxDecoration(
+                  //       color: Colors.grey.shade300,
+                  //       borderRadius: BorderRadius.circular(8),
+                  //     ),
+                  //   ),
+                  // ),
                   Text(
                     "What's In Your Mind",
                     textAlign: TextAlign.center,
