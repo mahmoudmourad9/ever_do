@@ -56,14 +56,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             Switch(
               value: isDarkMode,
-              // ignore: deprecated_member_use
+             
               activeColor: const Color(0xFF004A63),
               onChanged: (value) async {
                 setState(() {
                   isDarkMode = value;
                 });
                 await _saveSettings();
-                widget.onThemeChanged?.call(value); // دي اللي بتغير الثيم في باقي الأبلكيشن
+                widget.onThemeChanged?.call(value); 
               },
             ),
             const SizedBox(height: 24),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'main_navigation_screen.dart'; 
+import 'main_navigation_screen.dart';
 
 class SplashPage extends StatelessWidget {
-  final VoidCallback onToggleTheme;
+  final Function(bool) onThemeChanged;
 
-  const SplashPage({super.key, required this.onToggleTheme});
+  const SplashPage({super.key, required this.onThemeChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -58,18 +58,19 @@ class SplashPage extends StatelessWidget {
               ),
               ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF004A63),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                    textStyle: const TextStyle(fontSize: 18,)
-                  ),
+                      backgroundColor: const Color(0xFF004A63),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 40, vertical: 12),
+                      textStyle: const TextStyle(
+                        fontSize: 18,
+                      )),
                   onPressed: () {
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                 
-                          builder: (_) =>
-                              MainNavigationScreen(onToggleTheme: onToggleTheme),
+                          builder: (_) => MainNavigationScreen(
+                              onThemeChanged: onThemeChanged),
                         ));
                   },
                   child: const Text('Get Started'))

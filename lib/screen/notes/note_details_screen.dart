@@ -1,3 +1,4 @@
+import 'package:everdo_app/models/note_model.dart';
 import 'package:flutter/material.dart';
 import 'notes_screen.dart'; 
 

@@ -1,49 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:everdo_app/widget/app_bar.dart';
+import 'package:everdo_app/models/diary_entry_model.dart';
+import 'package:everdo_app/widget/AppBar%20.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class DiaryEntry {
-  DateTime date;
-  String text;
-  int emojiIndex;
-  double sliderValue;
-  String? imagePath;
 
-  DiaryEntry({
-    required this.date,
-    required this.text,
-    required this.emojiIndex,
-    required this.sliderValue,
-    this.imagePath,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'date': date.millisecondsSinceEpoch,
-      'text': text,
-      'emojiIndex': emojiIndex,
-      'sliderValue': sliderValue,
-      'imagePath': imagePath,
-    };
-  }
-
-  factory DiaryEntry.fromMap(Map<String, dynamic> map) {
-    return DiaryEntry(
-      date: DateTime.fromMillisecondsSinceEpoch(map['date']),
-      text: map['text'],
-      emojiIndex: map['emojiIndex'],
-      sliderValue: (map['sliderValue'] as num).toDouble(),
-      imagePath: map['imagePath'],
-    );
-  }
-}
 
 class DiaryScreen extends StatefulWidget {
   final VoidCallback? onToggleTheme;
 
-  const DiaryScreen({super.key, this.onToggleTheme});
+  const DiaryScreen({super.key, this.onToggleTheme, required Function(bool p1) onThemeChanged});
 
   @override
   DiaryScreenState createState() => DiaryScreenState();

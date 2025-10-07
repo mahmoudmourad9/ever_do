@@ -1,41 +1,15 @@
 import 'dart:convert';
-import 'package:everdo_app/widget/app_bar.dart';
+import 'package:everdo_app/models/note_model.dart';
+import 'package:everdo_app/widget/AppBar%20.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'note_details_screen.dart';
 
-class Note {
-  String title;
-  String text;
-  DateTime date;
-
-  Note({
-    required this.title,
-    required this.text,
-    required this.date,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'title': title,
-      'text': text,
-      'date': date.millisecondsSinceEpoch,
-    };
-  }
-
-  factory Note.fromMap(Map<String, dynamic> map) {
-    return Note(
-      title: map['title'],
-      text: map['text'],
-      date: DateTime.fromMillisecondsSinceEpoch(map['date']),
-    );
-  }
-}
 
 class NotesScreen extends StatefulWidget {
   final VoidCallback? onToggleTheme;
 
-  const NotesScreen({super.key, this.onToggleTheme});
+  const NotesScreen({super.key, this.onToggleTheme, required Function(bool p1) onThemeChanged});
 
   @override
   NotesScreenState createState() => NotesScreenState();

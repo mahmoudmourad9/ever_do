@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:everdo_app/models/diary_entry_model.dart';
 import 'package:flutter/material.dart';
 import 'diary_screen.dart';
 
