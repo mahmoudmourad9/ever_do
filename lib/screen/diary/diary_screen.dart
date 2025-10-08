@@ -1,17 +1,21 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:everdo_app/Providers/theme_provide.dart';
 import 'package:everdo_app/models/diary_entry_model.dart';
 import 'package:everdo_app/screen/diary/details_screen.dart';
 import 'package:everdo_app/widget/AppBar%20.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-
 
 class DiaryScreen extends StatefulWidget {
   final VoidCallback? onToggleTheme;
 
-  const DiaryScreen({super.key, this.onToggleTheme, required Function(bool p1) onThemeChanged});
+  const DiaryScreen({
+    super.key,
+    this.onToggleTheme,
+    required Function(bool) onThemeChanged,
+  });
 
   @override
   DiaryScreenState createState() => DiaryScreenState();
@@ -37,9 +41,7 @@ class DiaryScreenState extends State<DiaryScreen> {
       final List decoded = jsonDecode(data);
       diaryEntries = decoded.map((e) => DiaryEntry.fromMap(e)).toList()
         ..sort((a, b) => b.date.compareTo(a.date));
-      if (mounted) {
-        setState(() {});
-      }
+      if (mounted) setState(() {});
     }
   }
 
@@ -51,22 +53,43 @@ class DiaryScreenState extends State<DiaryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
+    final cardColor =
+        isDarkMode ? Theme.of(context).colorScheme.surface : Colors.white;
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final secondaryTextColor =
+        isDarkMode ? Colors.grey.shade400 : Colors.black54;
+
     return Scaffold(
       extendBody: true,
+     
       body: Container(
-        decoration: const BoxDecoration(
+          decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFA8E8F2), Color(0xFFEAF9FC)],
+            colors: isDarkMode
+                ? [
+                    const Color(0xFF0E1A1F),
+                    const Color(0xFF1E2C33),
+                  ]
+                : [
+                    const Color(0xFFA8E8F2),
+                    const Color(0xFFEAF9FC),
+                  ],
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
- costmAppbar( titel: 'اليوميات', rightIcon: Icons.note_alt_outlined,),
+              costmAppbar(
+                titel: 'اليوميات',
+               
+              ),
               Expanded(
-                child: diaryEntries.isEmpty ? _buildEmpty() : _buildList(),
+                child: diaryEntries.isEmpty ? _buildEmpty(isDarkMode, textColor) : _buildList(cardColor, textColor, secondaryTextColor),
               ),
             ],
           ),
@@ -74,22 +97,30 @@ class DiaryScreenState extends State<DiaryScreen> {
       ),
     );
   }
-// لما تكون البيانات مش  موجودة أو غير مُضافة في الشاشة.
-  Widget _buildEmpty() {
+
+  Widget _buildEmpty(bool isDarkMode, Color textColor) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children:  [
-Image.asset('assets/images/write.png',height: 120,),
-          SizedBox(height: 10),
-          Text('دون يومياتك',
-              style: TextStyle(fontSize: 20, color: Colors.black54)),
+        children: [
+          Image.asset(
+  Theme.of(context).brightness == Brightness.dark
+      ? 'assets/images/write_white.png' 
+      : 'assets/images/write.png', 
+  height: 120,
+),
+
+          const SizedBox(height: 10),
+          Text(
+            'دون يومياتك',
+            style: TextStyle(fontSize: 20, color: textColor.withOpacity(0.6)),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildList() {
+  Widget _buildList(Color cardColor, Color textColor, Color secondaryTextColor) {
     return ListView.builder(
       padding: const EdgeInsets.all(12),
       itemCount: diaryEntries.length,
@@ -102,19 +133,76 @@ Image.asset('assets/images/write.png',height: 120,),
               MaterialPageRoute(builder: (_) => DetailsScreen(entry: e)),
             );
           },
-          onLongPress: () async {
+ 
+          child: Card(
+  color: cardColor,
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+  elevation: 4,
+  margin: const EdgeInsets.only(bottom: 16),
+  child: Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+    child: ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      leading: e.imagePath != null
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.file(
+                File(e.imagePath!),
+                width: 70, 
+                height: 70,
+                fit: BoxFit.cover,
+              ),
+            )
+          : Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey.withOpacity(0.2),
+              ),
+              child: Center(
+                child: Text(
+                  _emojiFromIndex(e.emojiIndex),
+                  style: const TextStyle(fontSize: 32), 
+                ),
+              ),
+            ),
+      title: Text(
+        e.text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          fontSize: 16, 
+        ),
+      ),
+      subtitle: Text(
+        '${e.date.day}/${e.date.month}/${e.date.year}',
+        style: TextStyle(
+          color: secondaryTextColor,
+          fontSize: 14, 
+        ),
+      ),
+      trailing: IconButton(
+        icon: const Icon(Icons.delete_outline, size: 28, color: Colors.redAccent),
+                 onPressed: () async {
             final confirm = await showDialog(
               context: context,
               builder: (_) => AlertDialog(
-                title: const Text('حذف اليومية'),
-                content: const Text('هل تريد حذف هذه اليومية؟'),
+                backgroundColor: cardColor,
+                title: Text('حذف اليومية', style: TextStyle(color: textColor)),
+                content:
+                    Text('هل تريد حذف هذه اليومية؟', style: TextStyle(color: secondaryTextColor)),
                 actions: [
                   TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('إلغاء')),
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('إلغاء'),
+                  ),
                   TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('نعم')),
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('نعم'),
+                  ),
                 ],
               ),
             );
@@ -124,36 +212,11 @@ Image.asset('assets/images/write.png',height: 120,),
               setState(() {});
             }
           },
-          child: Card(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            elevation: 4,
-            margin: const EdgeInsets.only(bottom: 12),
-            child: ListTile(
-              leading: e.imagePath != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.file(File(e.imagePath!),
-                          width: 56, height: 56, fit: BoxFit.cover),
-                    )
-                  : Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.grey.shade200,
-                      ),
-                      child: Center(
-                        child: Text(_emojiFromIndex(e.emojiIndex),
-                            style: const TextStyle(fontSize: 26)),
-                      ),
-                    ),
-              title:
-                  Text(e.text, maxLines: 1, overflow: TextOverflow.ellipsis),
-              subtitle:
-                  Text('${e.date.day}/${e.date.month}/${e.date.year}'),
-            ),
-          ),
+      ),
+    ),
+  ),
+)
+
         );
       },
     );
@@ -165,4 +228,3 @@ Image.asset('assets/images/write.png',height: 120,),
     return list[i];
   }
 }
-

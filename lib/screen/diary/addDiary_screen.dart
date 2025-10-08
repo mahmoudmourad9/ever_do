@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:everdo_app/Providers/theme_provide.dart';
+import 'package:everdo_app/widget/MoodCard.dart';
+import 'package:everdo_app/widget/image_picker_card.dart'; // ✅ استيراد الويدجت الجديدة
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +17,7 @@ class AddScreen extends StatefulWidget {
 
 class _AddScreenState extends State<AddScreen> {
   final TextEditingController _controller = TextEditingController();
-  final ImagePicker _picker = ImagePicker();
+
   File? _pickedImage;
   int _selectedEmoji = 2;
   double _sliderValue = 0.5;
@@ -32,14 +33,42 @@ class _AddScreenState extends State<AddScreen> {
       _selectedEmoji = e['emojiIndex'] ?? 2;
       _sliderValue = (e['sliderValue'] ?? 0.5).toDouble();
       _date = DateTime.fromMillisecondsSinceEpoch(
-          e['date'] ?? DateTime.now().millisecondsSinceEpoch);
+        e['date'] ?? DateTime.now().millisecondsSinceEpoch,
+      );
       _originalDate = _date;
-      if (e['imagePath'] != null) _pickedImage = File(e['imagePath']);
+
+      final imagePath = e['imagePath'];
+      if (imagePath != null && File(imagePath).existsSync()) {
+        _pickedImage = File(imagePath);
+      }
     }
   }
 
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  Future<void> _pickDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme:
+                ColorScheme.light(primary: Theme.of(context).primaryColor),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) setState(() => _date = picked);
   }
 
   void _save() async {
@@ -78,7 +107,7 @@ class _AddScreenState extends State<AddScreen> {
       'text': _controller.text.trim(),
       'emojiIndex': _selectedEmoji,
       'sliderValue': _sliderValue,
-      'imagePath': _pickedImage?.path,
+      'imagePath': _pickedImage?.path ?? widget.initialEntry?['imagePath'],
     };
 
     if (widget.initialEntry != null) {
@@ -87,12 +116,9 @@ class _AddScreenState extends State<AddScreen> {
     }
 
     entriesList.add(newEntry);
-
     await prefs.setString('diary_entries', jsonEncode(entriesList));
 
-    if (mounted) {
-      Navigator.pop(context);
-    }
+    if (mounted) Navigator.pop(context);
   }
 
   @override
@@ -100,8 +126,6 @@ class _AddScreenState extends State<AddScreen> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = themeProvider.isDarkMode;
 
-    final Color cardColor =
-        isDarkMode ? Theme.of(context).colorScheme.surface : Colors.white;
     final Color inputFillColor =
         isDarkMode ? Colors.grey.shade800 : Colors.black12;
     final Color primaryTextColor =
@@ -112,8 +136,9 @@ class _AddScreenState extends State<AddScreen> {
       appBar: AppBar(
         elevation: 0,
         title: Text(
-            widget.initialEntry != null ? 'تعديل اليومية' : 'إضافة يومية',
-            style: Theme.of(context).textTheme.headlineSmall),
+          widget.initialEntry != null ? 'تعديل اليومية' : 'إضافة يومية',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
@@ -121,174 +146,124 @@ class _AddScreenState extends State<AddScreen> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(10),
         child: SingleChildScrollView(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('${_date.day} / ${_date.month} / ${_date.year}',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+            
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${_date.day} / ${_date.month} / ${_date.year}',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                       color: primaryTextColor,
-                    )),
-                IconButton(
-                    icon: Icon(Icons.calendar_month,
-                        color: Theme.of(context).primaryColor),
-                    onPressed: _pickDate),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text('شعورك اليوم',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: primaryTextColor)),
-            const SizedBox(height: 10),
-            Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              color: cardColor,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 15),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(5, (i) {
-                        return GestureDetector(
-                          onTap: () => setState(() => _selectedEmoji = i),
-                          child: Opacity(
-                            opacity: _selectedEmoji == i ? 1.0 : 0.5,
-                            child: Text(_emojiFromIndex(i),
-                                style: const TextStyle(fontSize: 30)),
-                          ),
-                        );
-                      }),
                     ),
-                    const SizedBox(height: 10),
-                    Slider(
-                        value: _sliderValue,
-                        activeColor: Theme.of(context).primaryColor,
-                        onChanged: (v) => setState(() => _sliderValue = v)),
-                  ],
-                ),
+                  ),
+                  CircleAvatar(
+                    backgroundColor: const Color(0xFF006C8D),
+                    child: IconButton(
+                      icon: Icon(Icons.calendar_month,
+                         color: Colors.white,),
+                      onPressed: _pickDate,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 20),
-            Text('إضافة صورة',
+
+              Text(
+                'شعورك اليوم',
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: primaryTextColor)),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: _pickImage,
-              child: Container(
-                height: 130,
-                decoration: BoxDecoration(
-                    color: inputFillColor,
-                    borderRadius: BorderRadius.circular(10)),
-                child: _pickedImage == null
-                    ? Center(
-                        child: Text('أضف صورة...',
-                            style: TextStyle(
-                                color: isDarkMode
-                                    ? Colors.white54
-                                    : Colors.black45)))
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.file(_pickedImage!,
-                            width: double.infinity,
-                            height: 130,
-                            fit: BoxFit.cover)),
+                    color: primaryTextColor),
               ),
-            ),
-            const SizedBox(height: 25),
-            Text('اليومية',
+              const SizedBox(height: 10),
+
+              MoodCard(
+                selectedEmoji: _selectedEmoji,
+                sliderValue: _sliderValue,
+                onEmojiSelected: (i) {
+                  setState(() {
+                    _selectedEmoji = i;
+                    _sliderValue = i / 4;
+                  });
+                },
+                onSliderChanged: (v) {
+                  setState(() {
+                    _sliderValue = v;
+                    _selectedEmoji = (v * 4).round();
+                  });
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+           
+              ImagePickerCard(
+                initialImage: _pickedImage,
+                isDarkMode: isDarkMode,
+                onImagePicked: (image) {
+                  setState(() {
+                    _pickedImage = image;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 25),
+
+              Text(
+                'اليومية',
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: primaryTextColor)),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _controller,
-              maxLines: 5,
-              style: TextStyle(color: primaryTextColor),
-              decoration: InputDecoration(
-                hintText: 'ما الذي تريد إضافته اليوم',
-                hintStyle:
-                    TextStyle(color: isDarkMode ? Colors.grey : Colors.black38),
-                filled: true,
-                fillColor: inputFillColor,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none),
+                    color: primaryTextColor),
               ),
-            ),
-            const SizedBox(height: 25),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+              const SizedBox(height: 10),
+
+              TextField(
+                controller: _controller,
+                maxLines: 15,
+                style: TextStyle(color: primaryTextColor),
+                decoration: InputDecoration(
+                  hintText: 'ما الذي تريد إضافته اليوم',
+                  hintStyle: TextStyle(
+                      color: isDarkMode ? Colors.grey : Colors.black38),
+                  filled: true,
+                  fillColor: inputFillColor,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none),
                 ),
-                onPressed: _save,
-                child: const Text('حفظ',
+              ),
+
+              const SizedBox(height: 25),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: _save,
+                  child: const Text(
+                    'حفظ',
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    )),
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  String _emojiFromIndex(int i) {
-    const list = ['😡', '☹️', '🙂', '😄', '😍'];
-    if (i < 0 || i >= list.length) return '🙂';
-    return list[i];
-  }
-
-  Future<void> _pickImage() async {
-    final XFile? image =
-        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 75);
-    if (image != null) setState(() => _pickedImage = File(image.path));
-  }
-
-  Future<void> _pickDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _date,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Theme.of(context).primaryColor,
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).primaryColor,
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) setState(() => _date = picked);
   }
 }

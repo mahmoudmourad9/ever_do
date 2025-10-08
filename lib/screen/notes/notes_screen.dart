@@ -1,15 +1,20 @@
 import 'dart:convert';
+import 'package:everdo_app/Providers/theme_provide.dart';
 import 'package:everdo_app/models/note_model.dart';
-import 'package:everdo_app/widget/AppBar%20.dart';
+import 'package:everdo_app/widget/AppBar .dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'note_details_screen.dart';
-
 
 class NotesScreen extends StatefulWidget {
   final VoidCallback? onToggleTheme;
 
-  const NotesScreen({super.key, this.onToggleTheme, required Function(bool p1) onThemeChanged});
+  const NotesScreen({
+    super.key,
+    this.onToggleTheme,
+    required Function(bool) onThemeChanged,
+  });
 
   @override
   NotesScreenState createState() => NotesScreenState();
@@ -35,9 +40,7 @@ class NotesScreenState extends State<NotesScreen> {
       final List decoded = jsonDecode(data);
       notes = decoded.map((e) => Note.fromMap(e)).toList()
         ..sort((a, b) => b.date.compareTo(a.date));
-      if (mounted) {
-        setState(() {});
-      }
+      if (mounted) setState(() {});
     }
   }
 
@@ -49,22 +52,44 @@ class NotesScreenState extends State<NotesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
+    final cardColor =
+        isDarkMode ? Theme.of(context).colorScheme.surface : Colors.white;
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final secondaryTextColor =
+        isDarkMode ? Colors.grey.shade400 : Colors.black54;
+
     return Scaffold(
       extendBody: true,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFA8E8F2), Color(0xFFEAF9FC)],  //عايز يتعادل عشان يتوافق مع الدرك مود
+            colors: isDarkMode
+                ? [
+                    const Color(0xFF0E1A1F),
+                    const Color(0xFF1E2C33),
+                  ]
+                : [
+                    const Color(0xFFA8E8F2),
+                    const Color(0xFFEAF9FC),
+                  ],
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
-              costmAppbar(  titel: 'الملاحظات', rightIcon: Icons.note_alt_outlined,),
+              costmAppbar(
+                titel: 'الملاحظات',
+              
+              ),
               Expanded(
-                child: notes.isEmpty ? _buildEmpty() : _buildList(),
+                child: notes.isEmpty
+                    ? _buildEmpty(isDarkMode, textColor)
+                    : _buildList(cardColor, textColor, secondaryTextColor),
               ),
             ],
           ),
@@ -73,21 +98,29 @@ class NotesScreenState extends State<NotesScreen> {
     );
   }
 
-  Widget _buildEmpty() {
+  Widget _buildEmpty(bool isDarkMode, Color textColor) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children:  [
-          Image.asset('assets/images/notes.png',height: 120,),
-          SizedBox(height: 10),
-          Text('لا يوجد ملاحظات',
-              style: TextStyle(fontSize: 20, color: Colors.black54)),
+        children: [
+          Image.asset(
+            isDarkMode
+                ? 'assets/images/notes_white.png'
+                : 'assets/images/notes.png',
+            height: 120,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'لا يوجد ملاحظات',
+            style: TextStyle(fontSize: 20, color: textColor.withOpacity(0.6)),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildList() {
+  Widget _buildList(
+      Color cardColor, Color textColor, Color secondaryTextColor) {
     return ListView.builder(
       padding: const EdgeInsets.all(12),
       itemCount: notes.length,
@@ -113,12 +146,14 @@ class NotesScreenState extends State<NotesScreen> {
             final confirm = await showDialog<bool>(
               context: context,
               builder: (_) => AlertDialog(
-                title: const Text('حذف الملاحظة'),
-                content: const Text('هل تريد حذف هذه الملاحظة؟'),
+                backgroundColor: cardColor,
+                title: Text('حذف الملاحظة', style: TextStyle(color: textColor)),
+                content: Text('هل تريد حذف هذه الملاحظة؟',
+                    style: TextStyle(color: secondaryTextColor)),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('إلغاء')),
+                      child: const Text('إلغاء' )),
                   TextButton(
                       onPressed: () => Navigator.pop(context, true),
                       child: const Text('نعم')),
@@ -132,6 +167,7 @@ class NotesScreenState extends State<NotesScreen> {
             }
           },
           child: Card(
+            color: cardColor,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 4,
@@ -145,10 +181,16 @@ class NotesScreenState extends State<NotesScreen> {
                       color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
-              title: Text(note.title,
-                  maxLines: 1, overflow: TextOverflow.ellipsis),
-              subtitle:
-                  Text('${note.date.day}/${note.date.month}/${note.date.year}'),
+              title: Text(
+                note.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                '${note.date.day}/${note.date.month}/${note.date.year}',
+                style: TextStyle(color: secondaryTextColor),
+              ),
             ),
           ),
         );
@@ -156,4 +198,3 @@ class NotesScreenState extends State<NotesScreen> {
     );
   }
 }
-

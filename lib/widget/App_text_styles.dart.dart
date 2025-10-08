@@ -7,7 +7,7 @@ class AppColors {
 
   // ألوان الخلفيات
   static const Color lightBackground = Color(0xFFEAF9FC);
-  static const Color darkBackground = Colors.black;
+  static const Color darkBackground = Color(0xFF1E2C33);
 
   // ألوان النصوص للوضع الفاتح
   static const Color lightTextPrimary = Colors.black87;

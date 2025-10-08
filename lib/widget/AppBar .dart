@@ -5,11 +5,11 @@ class costmAppbar extends StatelessWidget {
   const costmAppbar({
     super.key,
     required this.titel,
-    required this.rightIcon,
+   
   });
 
   final String titel;
-  final IconData? rightIcon;
+  
 
   get onThemeChanged => null;
 
@@ -48,10 +48,7 @@ class costmAppbar extends StatelessWidget {
               const SizedBox(width: 8),
               CircleAvatar(
                 backgroundColor: const Color(0xFF006C8D),
-                child: IconButton(
-                  icon: Icon(rightIcon, color: Colors.white),
-                  onPressed: () {},
-                ),
+                child: Image.asset('assets/images/logo_bar.png')
               ),
             ],
           ),

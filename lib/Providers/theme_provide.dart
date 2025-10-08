@@ -1,7 +1,7 @@
 import 'package:everdo_app/widget/App_text_styles.dart.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:provider/provider.dart';
+
 
 class ThemeProvider with ChangeNotifier {
   bool _isDarkMode = false;
@@ -38,6 +38,7 @@ class ThemeProvider with ChangeNotifier {
     colorScheme: ColorScheme.light(
       primary: AppColors.primary,
       secondary: AppColors.secondary,
+      // ignore: deprecated_member_use
       background: AppColors.lightBackground,
       surface: Colors.white,
     ),
@@ -47,11 +48,11 @@ class ThemeProvider with ChangeNotifier {
       centerTitle: true,
       elevation: 0,
     ),
-    bottomAppBarTheme: const BottomAppBarTheme(
+    bottomAppBarTheme: const BottomAppBarThemeData(
       color: AppColors.primary,
       elevation: 0,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: Colors.white,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -78,11 +79,11 @@ class ThemeProvider with ChangeNotifier {
       centerTitle: true,
       elevation: 0,
     ),
-    bottomAppBarTheme: const BottomAppBarTheme(
+    bottomAppBarTheme: const BottomAppBarThemeData(
       color: AppColors.primary,
       elevation: 0,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: Colors.grey[850],
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
