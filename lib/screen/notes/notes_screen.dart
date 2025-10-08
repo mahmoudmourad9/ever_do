@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:everdo_app/Providers/theme_provide.dart';
 import 'package:everdo_app/models/note_model.dart';
-import 'package:everdo_app/widget/AppBar .dart';
+import 'package:everdo_app/widget/AppBar%20.dart';
+import 'package:everdo_app/widget/NoteList.dart';
+import 'package:everdo_app/widget/_DeleteConfirmationDialog.dart';
+import 'package:everdo_app/widget/_EmptyState.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,7 +16,7 @@ class NotesScreen extends StatefulWidget {
   const NotesScreen({
     super.key,
     this.onToggleTheme,
-    required Function(bool) onThemeChanged,
+    required Function(bool p1) onThemeChanged,
   });
 
   @override
@@ -37,10 +40,14 @@ class NotesScreenState extends State<NotesScreen> {
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getString('notes');
     if (data != null) {
-      final List decoded = jsonDecode(data);
-      notes = decoded.map((e) => Note.fromMap(e)).toList()
-        ..sort((a, b) => b.date.compareTo(a.date));
-      if (mounted) setState(() {});
+      try {
+        final List decoded = jsonDecode(data);
+        notes = decoded.map((e) => Note.fromMap(e)).toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
+        if (mounted) setState(() {});
+      } catch (e) {
+        print('Error decoding notes: $e');
+      }
     }
   }
 
@@ -54,12 +61,17 @@ class NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = themeProvider.isDarkMode;
+
     final cardColor =
         isDarkMode ? Theme.of(context).colorScheme.surface : Colors.white;
     final textColor =
         Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     final secondaryTextColor =
         isDarkMode ? Colors.grey.shade400 : Colors.black54;
+
+    final backgroundGradientColors = isDarkMode
+        ? [const Color(0xFF0E1A1F), const Color(0xFF1E2C33)]
+        : [const Color(0xFFA8E8F2), const Color(0xFFEAF9FC)];
 
     return Scaffold(
       extendBody: true,
@@ -68,15 +80,7 @@ class NotesScreenState extends State<NotesScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: isDarkMode
-                ? [
-                    const Color(0xFF0E1A1F),
-                    const Color(0xFF1E2C33),
-                  ]
-                : [
-                    const Color(0xFFA8E8F2),
-                    const Color(0xFFEAF9FC),
-                  ],
+            colors: backgroundGradientColors,
           ),
         ),
         child: SafeArea(
@@ -84,12 +88,22 @@ class NotesScreenState extends State<NotesScreen> {
             children: [
               costmAppbar(
                 titel: 'الملاحظات',
-              
               ),
               Expanded(
                 child: notes.isEmpty
-                    ? _buildEmpty(isDarkMode, textColor)
-                    : _buildList(cardColor, textColor, secondaryTextColor),
+                    ? EmptyState(
+                        isDarkMode: isDarkMode,
+                        textColor: textColor,
+                      )
+                    : NoteList(
+                        notes: notes,
+                        cardColor: cardColor,
+                        textColor: textColor,
+                        secondaryTextColor: secondaryTextColor,
+                        onNoteTapped: (index) => _handleNoteTap(context, index),
+                        onNoteLongPressed: (index) => _handleDelete(context,
+                            index, cardColor, textColor, secondaryTextColor),
+                      ),
               ),
             ],
           ),
@@ -98,103 +112,36 @@ class NotesScreenState extends State<NotesScreen> {
     );
   }
 
-  Widget _buildEmpty(bool isDarkMode, Color textColor) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            isDarkMode
-                ? 'assets/images/notes_white.png'
-                : 'assets/images/notes.png',
-            height: 120,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'لا يوجد ملاحظات',
-            style: TextStyle(fontSize: 20, color: textColor.withOpacity(0.6)),
-          ),
-        ],
+  Future<void> _handleNoteTap(BuildContext context, int index) async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => NoteDetailsScreen(note: notes[index]),
       ),
     );
+
+    if (result != null) {
+      setState(() {
+        notes[index] = Note.fromMap(result);
+      });
+      await _saveNotes();
+    }
   }
 
-  Widget _buildList(
-      Color cardColor, Color textColor, Color secondaryTextColor) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(12),
-      itemCount: notes.length,
-      itemBuilder: (context, index) {
-        final note = notes[index];
-        return GestureDetector(
-          onTap: () async {
-            final result = await Navigator.push<Map<String, dynamic>>(
-              context,
-              MaterialPageRoute(
-                builder: (_) => NoteDetailsScreen(note: note),
-              ),
-            );
-
-            if (result != null) {
-              setState(() {
-                notes[index] = Note.fromMap(result);
-              });
-              await _saveNotes();
-            }
-          },
-          onLongPress: () async {
-            final confirm = await showDialog<bool>(
-              context: context,
-              builder: (_) => AlertDialog(
-                backgroundColor: cardColor,
-                title: Text('حذف الملاحظة', style: TextStyle(color: textColor)),
-                content: Text('هل تريد حذف هذه الملاحظة؟',
-                    style: TextStyle(color: secondaryTextColor)),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('إلغاء' )),
-                  TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('نعم')),
-                ],
-              ),
-            );
-            if (confirm == true) {
-              notes.removeAt(index);
-              await _saveNotes();
-              setState(() {});
-            }
-          },
-          child: Card(
-            color: cardColor,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            elevation: 4,
-            margin: const EdgeInsets.only(bottom: 12),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: const Color(0xFF006C8D),
-                child: Text(
-                  note.title.isNotEmpty ? note.title[0].toUpperCase() : 'N',
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
-              title: Text(
-                note.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                '${note.date.day}/${note.date.month}/${note.date.year}',
-                style: TextStyle(color: secondaryTextColor),
-              ),
-            ),
-          ),
-        );
-      },
+  Future<void> _handleDelete(BuildContext context, int index, Color cardColor,
+      Color textColor, Color secondaryTextColor) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => DeleteConfirmationDialog(
+        cardColor: cardColor,
+        textColor: textColor,
+        secondaryTextColor: secondaryTextColor,
+      ),
     );
+    if (confirm == true) {
+      notes.removeAt(index);
+      await _saveNotes();
+      setState(() {});
+    }
   }
 }

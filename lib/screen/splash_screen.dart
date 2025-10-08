@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'main_navigation_screen.dart';
 
 class SplashPage extends StatefulWidget {
@@ -15,8 +15,8 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    // الانتقال بعد 3 ثواني تلقائيًا
-    Future.delayed(const Duration(seconds: 3), () {
+
+    Future.delayed(const Duration(seconds: 10), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -30,6 +30,8 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
+    const String customFontFamily = 'jomhuria';
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -45,19 +47,20 @@ class _SplashPageState extends State<SplashPage> {
                 fit: BoxFit.contain,
               ),
               const SizedBox(height: 40),
-              Text(
-                'Write Down',
-                style: GoogleFonts.pacifico(fontSize: 28),
-              ),
+              const Text('Write Down',
+                  style: TextStyle(
+                    fontFamily: customFontFamily,
+                    fontSize: 45,
+                    fontWeight: FontWeight.bold,
+                  )),
               const SizedBox(height: 12),
-              Text(
-                "What's In Your Mind",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              const Text("What's In Your Mind",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: customFontFamily,
+                    fontSize: 40,
+                    fontWeight: FontWeight.w700,
+                  )),
             ],
           ),
         ),
