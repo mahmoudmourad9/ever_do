@@ -10,7 +10,7 @@ class NoteList extends StatelessWidget {
   final Function(int) onNoteTapped;
   final Function(int) onNoteLongPressed;
 
-  const NoteList({
+  const NoteList({super.key, 
     required this.notes,
     required this.cardColor,
     required this.textColor,

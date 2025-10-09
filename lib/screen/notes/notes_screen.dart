@@ -45,8 +45,9 @@ class NotesScreenState extends State<NotesScreen> {
         notes = decoded.map((e) => Note.fromMap(e)).toList()
           ..sort((a, b) => b.date.compareTo(a.date));
         if (mounted) setState(() {});
+      // ignore: empty_catches
       } catch (e) {
-        print('Error decoding notes: $e');
+       
       }
     }
   }
@@ -86,7 +87,7 @@ class NotesScreenState extends State<NotesScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              costmAppbar(
+              const costmAppbar(
                 titel: 'الملاحظات',
               ),
               Expanded(

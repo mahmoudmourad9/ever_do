@@ -1,10 +1,11 @@
+// ignore: file_names
 import 'package:flutter/material.dart';
 
 class EmptyState extends StatelessWidget {
   final bool isDarkMode;
   final Color textColor;
 
-  const EmptyState({required this.isDarkMode, required this.textColor});
+  const EmptyState({super.key, required this.isDarkMode, required this.textColor});
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +24,7 @@ class EmptyState extends StatelessWidget {
             'لا يوجد ملاحظات',
             style: TextStyle(
                 fontSize: 20,
+                // ignore: deprecated_member_use
                 color: textColor.withOpacity(0.6),
                 fontFamily: 'Tajawal'),  
           ),

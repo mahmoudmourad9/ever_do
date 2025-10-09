@@ -38,7 +38,7 @@ class costmAppbar extends StatelessWidget {
           ),
           Text(
             titel,
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'UthmanTNB'),
@@ -48,7 +48,7 @@ class costmAppbar extends StatelessWidget {
               const SizedBox(width: 8),
               CircleAvatar(
                 backgroundColor: const Color(0xFF006C8D),
-                child: Image.asset('assets/images/logo_bar.png')
+                child: Image.asset('assets/images/logoSPL.png')
               ),
             ],
           ),

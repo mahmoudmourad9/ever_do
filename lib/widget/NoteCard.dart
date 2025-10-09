@@ -9,7 +9,7 @@ class NoteCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onLongPress;
 
-  const NoteCard({
+  const NoteCard({super.key, 
     required this.note,
     required this.cardColor,
     required this.textColor,
@@ -24,6 +24,7 @@ class NoteCard extends StatelessWidget {
       onTap: onTap,
       onLongPress: onLongPress,
       child: Card(
+        
         color: cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 4,
@@ -33,21 +34,22 @@ class NoteCard extends StatelessWidget {
             backgroundColor: const Color(0xFF006C8D),
             child: Text(
               note.title.isNotEmpty ? note.title[0].toUpperCase() : 'N',
-              style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.bold,fontFamily: 'jomhuria'),
             ),
           ),
           title: Text(
+            textDirection:TextDirection.rtl,
             note.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
                 color: textColor,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Tajawal'),
+                fontWeight: FontWeight.w500,
+                fontFamily: 'PlaypenSansArabic'),
           ),
           subtitle: Text(
             '${note.date.day}/${note.date.month}/${note.date.year}',
-            style: TextStyle(color: secondaryTextColor, fontFamily: 'Tajawal'),
+            style: TextStyle(color: secondaryTextColor, fontFamily: 'jomhuria',fontSize: 18),
           ),
         ),
       ),

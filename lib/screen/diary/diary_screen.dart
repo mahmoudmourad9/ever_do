@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:everdo_app/Providers/theme_provide.dart';
 import 'package:everdo_app/models/diary_entry_model.dart';
-import 'package:everdo_app/screen/diary/details_screen.dart';
-import 'package:everdo_app/widget/AppBar%20.dart';
+import 'package:everdo_app/widget/AppBar .dart';
+import 'package:everdo_app/widget/_DeleteConfirmationDialog.dart';
+import 'package:everdo_app/widget/diary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -64,9 +64,8 @@ class DiaryScreenState extends State<DiaryScreen> {
 
     return Scaffold(
       extendBody: true,
-     
       body: Container(
-          decoration: BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -84,12 +83,13 @@ class DiaryScreenState extends State<DiaryScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              costmAppbar(
+              const costmAppbar(
                 titel: 'اليوميات',
-               
               ),
               Expanded(
-                child: diaryEntries.isEmpty ? _buildEmpty(isDarkMode, textColor) : _buildList(cardColor, textColor, secondaryTextColor),
+                child: diaryEntries.isEmpty
+                    ? _buildEmpty(isDarkMode, textColor)
+                    : _buildList(cardColor, textColor, secondaryTextColor),
               ),
             ],
           ),
@@ -104,15 +104,15 @@ class DiaryScreenState extends State<DiaryScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-  Theme.of(context).brightness == Brightness.dark
-      ? 'assets/images/write_white.png' 
-      : 'assets/images/write.png', 
-  height: 120,
-),
-
+            Theme.of(context).brightness == Brightness.dark
+                ? 'assets/images/write_white.png'
+                : 'assets/images/write.png',
+            height: 120,
+          ),
           const SizedBox(height: 10),
           Text(
             'دون يومياتك',
+            // ignore: deprecated_member_use
             style: TextStyle(fontSize: 20, color: textColor.withOpacity(0.6)),
           ),
         ],
@@ -126,84 +126,18 @@ class DiaryScreenState extends State<DiaryScreen> {
       itemCount: diaryEntries.length,
       itemBuilder: (context, index) {
         final e = diaryEntries[index];
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => DetailsScreen(entry: e)),
-            );
-          },
- 
-          child: Card(
-  color: cardColor,
-  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-  elevation: 4,
-  margin: const EdgeInsets.only(bottom: 16),
-  child: Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-    child: ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      leading: e.imagePath != null
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.file(
-                File(e.imagePath!),
-                width: 70, 
-                height: 70,
-                fit: BoxFit.cover,
-              ),
-            )
-          : Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.grey.withOpacity(0.2),
-              ),
-              child: Center(
-                child: Text(
-                  _emojiFromIndex(e.emojiIndex),
-                  style: const TextStyle(fontSize: 32), 
-                ),
-              ),
-            ),
-      title: Text(
-        e.text,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-          fontSize: 16, 
-        ),
-      ),
-      subtitle: Text(
-        '${e.date.day}/${e.date.month}/${e.date.year}',
-        style: TextStyle(
-          color: secondaryTextColor,
-          fontSize: 14, 
-        ),
-      ),
-      trailing: IconButton(
-        icon: const Icon(Icons.delete_outline, size: 28, color: Colors.redAccent),
-                 onPressed: () async {
+        return DiaryEntryCard(
+          entry: e,
+          cardColor: cardColor,
+          textColor: textColor,
+          secondaryTextColor: secondaryTextColor,
+          onDelete: () async {
             final confirm = await showDialog(
               context: context,
-              builder: (_) => AlertDialog(
-                backgroundColor: cardColor,
-                title: Text('حذف اليومية', style: TextStyle(color: textColor)),
-                content:
-                    Text('هل تريد حذف هذه اليومية؟', style: TextStyle(color: secondaryTextColor)),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('إلغاء'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: const Text('نعم'),
-                  ),
-                ],
+              builder: (_) => DeleteConfirmationDialog(
+                cardColor: cardColor,
+                textColor: textColor,
+                secondaryTextColor: secondaryTextColor,
               ),
             );
             if (confirm == true) {
@@ -212,19 +146,8 @@ class DiaryScreenState extends State<DiaryScreen> {
               setState(() {});
             }
           },
-      ),
-    ),
-  ),
-)
-
         );
       },
     );
-  }
-
-  String _emojiFromIndex(int i) {
-    const list = ['😡', '☹️', '🙂', '😄', '😍'];
-    if (i < 0 || i >= list.length) return '🙂';
-    return list[i];
   }
 }

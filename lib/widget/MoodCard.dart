@@ -62,7 +62,7 @@ class MoodCard extends StatelessWidget {
 
             // عرض الإيموجي المختار
             Text(
-              'المزاج الحالي: ${_emojiFromIndex(selectedEmoji)}',
+              ' ${_emojiFromIndex(selectedEmoji)}:المزاج الحالي',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
           ],

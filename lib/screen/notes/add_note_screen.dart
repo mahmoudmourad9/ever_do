@@ -66,10 +66,12 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
         Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     final Color inputFillColor =
         isDarkMode ? Colors.grey.shade800 : Colors.black12;
-
+const buttonColor = Color(0xFF004A63);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
+        backgroundColor: buttonColor,
+        foregroundColor: Colors.white,
         elevation: 0,
         title: Text(
             widget.initialNote != null ? 'تعديل ملاحظة' : 'إضافة ملاحظة',
@@ -84,7 +86,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
         padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
           child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -94,10 +96,13 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                       fontWeight: FontWeight.w500,
                       color: primaryTextColor,
                     )),
-                IconButton(
-                    icon: Icon(Icons.calendar_month,
-                        color: Theme.of(context).primaryColor),
-                    onPressed: _pickDate),
+                CircleAvatar(
+                  backgroundColor: const Color(0xFF006C8D),
+                  child: IconButton(
+                      icon: const Icon(Icons.calendar_month,
+                          color:Colors.white),
+                      onPressed: _pickDate),
+                ),
               ],
             ),
             const SizedBox(height: 25),
@@ -108,19 +113,24 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                     color: primaryTextColor)),
             const SizedBox(height: 10),
             TextField(
-              controller: _titleController,
-              style: TextStyle(color: primaryTextColor),
-              decoration: InputDecoration(
-                hintText: 'اكتب العنوان هنا',
-                hintStyle:
-                    TextStyle(color: isDarkMode ? Colors.grey : Colors.black38),
-                filled: true,
-                fillColor: inputFillColor,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none),
-              ),
-            ),
+  controller: _titleController,
+  textDirection: TextDirection.rtl,
+  style: TextStyle(color: primaryTextColor),
+  decoration: InputDecoration(
+    hintText: 'اكتب العنوان هنا',
+     hintTextDirection: TextDirection.rtl,
+    hintStyle: TextStyle(
+      color: isDarkMode ? Colors.grey : Colors.black38,
+    ),
+    filled: true,
+    fillColor: inputFillColor,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide.none,
+    ),
+  ),
+),
+
             const SizedBox(height: 25),
             Text('المحتوى',
                 style: TextStyle(
@@ -130,10 +140,12 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             const SizedBox(height: 10),
             TextField(
               controller: _textController,
+               textDirection: TextDirection.rtl,
               maxLines: 8,
               style: TextStyle(color: primaryTextColor),
               decoration: InputDecoration(
                 hintText: 'اكتب ملاحظتك هنا...',
+                hintTextDirection: TextDirection.rtl,
                 hintStyle:
                     TextStyle(color: isDarkMode ? Colors.grey : Colors.black38),
                 filled: true,

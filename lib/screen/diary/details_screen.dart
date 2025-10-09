@@ -25,10 +25,11 @@ class DetailsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
+
         elevation: 0,
-        title: Text(
+        title: const Text(
           'تفاصيل اليومية',
-          style: Theme.of(context).textTheme.headlineSmall,
+          style:TextStyle( color:  Colors.white,),
         ),
         centerTitle: true,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -71,10 +72,11 @@ class DetailsScreen extends StatelessWidget {
                     ),
                   
                   const SizedBox(height: 10),
-                  Text(
-                    _emojiFromIndex(entry.emojiIndex),
-                    style: const TextStyle(fontSize: 34),
-                  ),
+                Text(
+  ' ${_emojiFromIndex(entry.emojiIndex)}:شعور اليوم',
+  style: const TextStyle(fontSize: 20),
+),
+
                   const SizedBox(height: 16),
                   Text(
                     entry.text,
@@ -83,6 +85,7 @@ class DetailsScreen extends StatelessWidget {
                       fontSize: 18,
                       color: primaryTextColor,
                       height: 1.7,
+                      fontFamily: 'UthmanTNB'
                     ),
                   ),
                 ],

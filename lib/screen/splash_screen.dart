@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'main_navigation_screen.dart';
 
 class SplashPage extends StatefulWidget {
@@ -15,9 +14,9 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 4), () {
       Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(
           builder: (_) => MainNavigationScreen(
@@ -30,8 +29,6 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    const String customFontFamily = 'jomhuria';
-    const String fontfamilypacifico = 'Pacifico';
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -47,20 +44,26 @@ class _SplashPageState extends State<SplashPage> {
                 fit: BoxFit.contain,
               ),
               const SizedBox(height: 40),
-              const Text('Write Down',
-                  style: TextStyle(
-                    fontFamily: fontfamilypacifico,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  )),
+
+         
+              const Text(
+                'Write Down',
+                style: TextStyle(
+                  fontFamily: 'Pacifico', 
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 12),
-              const Text("What's In Your Mind",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: customFontFamily,
-                    fontSize: 40,
-                    fontWeight: FontWeight.w700,
-                  )),
+              const Text(
+                "What's In Your Mind",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'jomhuria', 
+                  fontSize: 42,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ],
           ),
         ),

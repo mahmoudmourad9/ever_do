@@ -5,7 +5,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
   final Color textColor;
   final Color secondaryTextColor;
 
-  const DeleteConfirmationDialog({
+  const DeleteConfirmationDialog({super.key, 
     required this.cardColor,
     required this.textColor,
     required this.secondaryTextColor,

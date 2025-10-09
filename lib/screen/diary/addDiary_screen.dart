@@ -134,10 +134,11 @@ class _AddScreenState extends State<AddScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
+         
         elevation: 0,
         title: Text(
           widget.initialEntry != null ? 'تعديل اليومية' : 'إضافة يومية',
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: const TextStyle( color:  Colors.white,),
         ),
         centerTitle: true,
         leading: IconButton(
@@ -166,7 +167,7 @@ class _AddScreenState extends State<AddScreen> {
                   CircleAvatar(
                     backgroundColor: const Color(0xFF006C8D),
                     child: IconButton(
-                      icon: Icon(Icons.calendar_month,
+                      icon: const Icon(Icons.calendar_month,
                          color: Colors.white,),
                       onPressed: _pickDate,
                     ),

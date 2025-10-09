@@ -35,7 +35,7 @@ class ThemeProvider with ChangeNotifier {
     brightness: Brightness.light,
     primaryColor: AppColors.primary,
     scaffoldBackgroundColor: AppColors.lightBackground,
-    colorScheme: ColorScheme.light(
+    colorScheme:const ColorScheme.light(
       primary: AppColors.primary,
       secondary: AppColors.secondary,
       // ignore: deprecated_member_use
@@ -70,6 +70,7 @@ class ThemeProvider with ChangeNotifier {
     colorScheme: ColorScheme.dark(
       primary: AppColors.primary,
       secondary: AppColors.secondary,
+      // ignore: deprecated_member_use
       background: AppColors.darkBackground,
       surface: Colors.grey[850]!,
     ),
