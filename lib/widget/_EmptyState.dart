@@ -24,7 +24,7 @@ class EmptyState extends StatelessWidget {
             style: TextStyle(
                 fontSize: 20,
                 color: textColor.withOpacity(0.6),
-                fontFamily: 'Tajawal'), // استخدام الخط العربي
+                fontFamily: 'Tajawal'),  
           ),
         ],
       ),

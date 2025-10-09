@@ -33,8 +33,7 @@ class NoteCard extends StatelessWidget {
             backgroundColor: const Color(0xFF006C8D),
             child: Text(
               note.title.isNotEmpty ? note.title[0].toUpperCase() : 'N',
-              style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
             ),
           ),
           title: Text(
@@ -48,7 +47,7 @@ class NoteCard extends StatelessWidget {
           ),
           subtitle: Text(
             '${note.date.day}/${note.date.month}/${note.date.year}',
-            style: TextStyle(color: secondaryTextColor, fontFamily: 'Tajawal'), 
+            style: TextStyle(color: secondaryTextColor, fontFamily: 'Tajawal'),
           ),
         ),
       ),

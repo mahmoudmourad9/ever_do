@@ -34,6 +34,10 @@ flutter:
       fonts:
         - asset: assets/font/PlaypenSansArabic-Bold.ttf
         - asset: assets/font/PlaypenSansArabic-Light.ttf
+    - family: Pacifico
+      fonts:
+        - asset: assets/font/Pacifico-Regular.ttf
+        
        
         
    

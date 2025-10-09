@@ -16,7 +16,7 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 10), () {
+    Future.delayed(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -31,7 +31,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     const String customFontFamily = 'jomhuria';
-
+    const String fontfamilypacifico = 'Pacifico';
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -49,8 +49,8 @@ class _SplashPageState extends State<SplashPage> {
               const SizedBox(height: 40),
               const Text('Write Down',
                   style: TextStyle(
-                    fontFamily: customFontFamily,
-                    fontSize: 45,
+                    fontFamily: fontfamilypacifico,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                   )),
               const SizedBox(height: 12),
