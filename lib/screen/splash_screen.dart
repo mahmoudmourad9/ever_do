@@ -61,7 +61,7 @@ class _SplashPageState extends State<SplashPage> {
                 style: TextStyle(
                   fontFamily: 'jomhuria', 
                   fontSize: 42,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
