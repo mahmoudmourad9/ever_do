@@ -15,8 +15,8 @@ class DeleteConfirmationDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: cardColor,
-      title: Text('حذف الملاحظة', style: TextStyle(color: textColor, fontFamily: 'Tajawal')),
-      content: Text('هل تريد حذف هذه الملاحظة؟',
+      title: Text('حذف اليومية', style: TextStyle(color: textColor, fontFamily: 'Tajawal')),
+      content: Text('هل تريد حذف هذا اليوم؟',
           style: TextStyle(color: secondaryTextColor, fontFamily: 'Tajawal')),
       actions: [
         TextButton(

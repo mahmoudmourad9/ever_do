@@ -1,13 +1,14 @@
+import 'package:flutter/material.dart';
 import 'package:everdo_app/models/diary_entry_model.dart';
 import 'package:everdo_app/screen/diary/addDiary_screen.dart';
 import 'package:everdo_app/screen/notes/add_note_screen.dart';
 import 'package:everdo_app/screen/diary/diary_screen.dart';
 import 'package:everdo_app/screen/notes/notes_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:everdo_app/auth/pin_service.dart';
+import '../auth/auth_service.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   final Function(bool) onThemeChanged;
-
   const MainNavigationScreen({super.key, required this.onThemeChanged});
 
   @override
@@ -15,28 +16,85 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _currentIndex = 0;
+  int _currentIndex = 1; // الصفحة الافتراضية: الملاحظات
   late final List<Widget> _pages;
 
-  final GlobalKey<DiaryScreenState> _diaryScreenKey =
-      GlobalKey<DiaryScreenState>();
-  final GlobalKey<NotesScreenState> _notesScreenKey =
-      GlobalKey<NotesScreenState>();
+  final GlobalKey<DiaryScreenState> _diaryScreenKey = GlobalKey<DiaryScreenState>();
+  final GlobalKey<NotesScreenState> _notesScreenKey = GlobalKey<NotesScreenState>();
+
+  final AuthService _authService = AuthService();
+  final PinService _pinService = PinService();
 
   @override
   void initState() {
     super.initState();
-
     _pages = [
       DiaryScreen(key: _diaryScreenKey, onThemeChanged: widget.onThemeChanged),
       NotesScreen(key: _notesScreenKey, onThemeChanged: widget.onThemeChanged),
     ];
   }
 
-  void _onTabTapped(int index) {
+  Future<void> _onTabTapped(int index) async {
+    if (index == 0) {
+      // التوثيق بالبصمة أولًا
+      bool isAuth = await _authService.authenticateUser();
+
+      if (!isAuth) {
+        // لو فشل التوثيق بالبصمة → fallback للـ PIN
+        isAuth = await _showPinDialog();
+      }
+
+      if (!isAuth) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('فشل التحقق من الهوية ❌')),
+        );
+        return; // لا يُفتح اليوميات
+      }
+    }
+
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  Future<bool> _showPinDialog() async {
+    final savedPin = await _pinService.getPin();
+    final controller = TextEditingController();
+
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              title: Text(savedPin == null ? 'إنشاء رمز مرور جديد' : 'أدخل رمز المرور'),
+              content: TextField(
+                controller: controller,
+                obscureText: true,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(hintText: 'PIN'),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('إلغاء'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if (savedPin == null) {
+                      await _pinService.savePin(controller.text);
+                      Navigator.of(context).pop(true);
+                    } else {
+                      final ok = await _pinService.verifyPin(controller.text);
+                      Navigator.of(context).pop(ok);
+                    }
+                  },
+                  child: const Text('تأكيد'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 
   @override
@@ -90,10 +148,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               IconButton(
-                icon: const Icon(
-                  Icons.menu_book,
-                  size: 32,
-                ),
+                icon: const Icon(Icons.menu_book, size: 32),
                 color: _currentIndex == 0 ? Colors.white : Colors.white54,
                 onPressed: () => _onTabTapped(0),
                 tooltip: 'اليوميات',

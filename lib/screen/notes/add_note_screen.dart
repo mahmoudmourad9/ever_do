@@ -75,7 +75,7 @@ const buttonColor = Color(0xFF004A63);
         elevation: 0,
         title: Text(
             widget.initialNote != null ? 'تعديل ملاحظة' : 'إضافة ملاحظة',
-            style: Theme.of(context).textTheme.headlineSmall),
+            style: TextStyle(color: Colors.white)),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
