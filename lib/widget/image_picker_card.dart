@@ -21,7 +21,7 @@ class ImagePickerCard extends StatefulWidget {
 class _ImagePickerCardState extends State<ImagePickerCard> {
   final ImagePicker _picker = ImagePicker();
   File? _pickedImage;
-  bool _isPicking = false; // لمنع الضغط المتكرر
+  bool _isPicking = false;
 
   @override
   void initState() {
@@ -30,7 +30,7 @@ class _ImagePickerCardState extends State<ImagePickerCard> {
   }
 
   Future<void> _pickImage() async {
-    if (_isPicking) return; // منع النقر المزدوج
+    if (_isPicking) return;
     setState(() => _isPicking = true);
 
     final XFile? image =
@@ -44,39 +44,100 @@ class _ImagePickerCardState extends State<ImagePickerCard> {
     setState(() => _isPicking = false);
   }
 
+  void _removeImage() {
+    setState(() => _pickedImage = null);
+    widget.onImagePicked(null);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Color inputFillColor =
-        widget.isDarkMode ? Colors.grey.shade800 : Colors.black12;
+    final primaryColor = Theme.of(context).primaryColor;
+    final isDark = widget.isDarkMode;
+
+    if (_pickedImage != null) {
+      return Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.file(
+              _pickedImage!,
+              width: double.infinity,
+              height: 250,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned(
+            top: 10,
+            right: 10,
+            child: GestureDetector(
+              onTap: _removeImage,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 20),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 10,
+            right: 10,
+            child: GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.9),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.edit, color: Colors.white, size: 20),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
 
     return GestureDetector(
       onTap: _pickImage,
       child: Container(
-        height: 300,
+        height: 150,
+        width: double.infinity,
         decoration: BoxDecoration(
-          color: inputFillColor,
-          borderRadius: BorderRadius.circular(10),
+          color: isDark
+              ? Colors.white.withOpacity(0.05)
+              : Colors.blue.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark ? Colors.white24 : primaryColor.withOpacity(0.3),
+            width: 2,
+            style: BorderStyle
+                .none, // We'll simulate dash with something else if needed, but solid is cleaner.
+          ), // Let's try simple styling first
         ),
-        child: _pickedImage == null
-            ? Center(
-                child: Text(
-                  'أضف صورة...',
-                  style: TextStyle(
-                    color:
-                        widget.isDarkMode ? Colors.white54 : Colors.black45,
-                    fontSize: 16,
-                  ),
-                ),
-              )
-            : ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.file(
-                  _pickedImage!,
-                  width: double.infinity,
-                  height: 300,
-                  fit: BoxFit.cover,
-                ),
+        // Dashed border simulation with CustomPaint is heavyweight,
+        // let's use a nice subtle border for "Ice" feel.
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.add_photo_alternate_rounded,
+              size: 40,
+              color: isDark ? Colors.white54 : primaryColor.withOpacity(0.5),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'أضف صورة للذكرى',
+              style: TextStyle(
+                color: isDark ? Colors.white54 : primaryColor.withOpacity(0.6),
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
+            ),
+          ],
+        ),
       ),
     );
   }

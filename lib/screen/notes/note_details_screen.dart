@@ -1,6 +1,6 @@
-import 'package:everdo_app/models/note_model.dart';
+import 'package:everdo_app/features/notes/domain/entities/note.dart';
 import 'package:flutter/material.dart';
-import 'package:everdo_app/Providers/theme_provide.dart';
+import 'package:everdo_app/Providers/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'add_note_screen.dart';
 
@@ -73,12 +73,16 @@ class NoteDetailsScreen extends StatelessWidget {
                         color: Colors.white),
                   ),
                   onPressed: () async {
-                    
                     final result = await Navigator.push<Map<String, dynamic>>(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            AddNoteScreen(initialNote: note.toMap()),
+                        builder: (_) => AddNoteScreen(
+                          initialNote: {
+                            'title': note.title,
+                            'text': note.text,
+                            'date': note.date.millisecondsSinceEpoch,
+                          },
+                        ),
                       ),
                     );
                     if (result != null) {

@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:everdo_app/models/diary_entry_model.dart';
-import 'package:everdo_app/Providers/theme_provide.dart';
+import 'package:everdo_app/features/diary/domain/entities/diary_entry.dart';
+import 'package:everdo_app/Providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -25,11 +25,12 @@ class DetailsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-
         elevation: 0,
         title: const Text(
           'تفاصيل اليومية',
-          style:TextStyle( color:  Colors.white,),
+          style: TextStyle(
+            color: Colors.white,
+          ),
         ),
         centerTitle: true,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -70,23 +71,20 @@ class DetailsScreen extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                     ),
-                  
                   const SizedBox(height: 10),
-                Text(
-  ' ${_emojiFromIndex(entry.emojiIndex)}:شعور اليوم',
-  style: const TextStyle(fontSize: 20),
-),
-
+                  Text(
+                    ' ${_emojiFromIndex(entry.emojiIndex)}:شعور اليوم',
+                    style: const TextStyle(fontSize: 20),
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     entry.text,
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      fontSize: 18,
-                      color: primaryTextColor,
-                      height: 1.7,
-                      fontFamily: 'UthmanTNB'
-                    ),
+                        fontSize: 18,
+                        color: primaryTextColor,
+                        height: 1.7,
+                        fontFamily: 'UthmanTNB'),
                   ),
                 ],
               ),

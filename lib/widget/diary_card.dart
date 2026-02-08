@@ -1,26 +1,21 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:everdo_app/models/diary_entry_model.dart';
+import 'package:everdo_app/features/diary/domain/entities/diary_entry.dart';
 import 'package:everdo_app/screen/diary/details_screen.dart';
 
 class DiaryEntryCard extends StatelessWidget {
   final DiaryEntry entry;
-  final Color cardColor;
-  final Color textColor;
-  final Color secondaryTextColor;
   final VoidCallback onDelete;
 
   const DiaryEntryCard({
     super.key,
     required this.entry,
-    required this.cardColor,
-    required this.textColor,
-    required this.secondaryTextColor,
     required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
+    print('entry image path: ${entry.imagePath}');
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -28,86 +23,114 @@ class DiaryEntryCard extends StatelessWidget {
           MaterialPageRoute(builder: (_) => DetailsScreen(entry: entry)),
         );
       },
-      child: Card(
-        color: cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 5,
+      child: Container(
         margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).shadowColor.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ],
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          padding: const EdgeInsets.all(12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-             
-              entry.imagePath != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.file(
-                        File(entry.imagePath!),
-                        width: 100, 
-                        height: 100,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : Container(
-                      width: 100, 
-                      height: 100,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        // ignore: deprecated_member_use
-                        color: Colors.grey.withOpacity(0.2),
-                      ),
-                      child: Center(
-                        child: Text(
-                          _emojiFromIndex(entry.emojiIndex),
-                          style: const TextStyle(fontSize: 40), // ← حجم الإيموجي أكبر
-                        ),
-                      ),
-                    ),
-              const SizedBox(width: 12),
-
+              Hero(
+                tag: 'image_${entry.date.millisecondsSinceEpoch}',
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest
+                        .withOpacity(0.3),
+                    image:
+                        entry.imagePath != null && entry.imagePath!.isNotEmpty
+                            ? DecorationImage(
+                                image: FileImage(File(entry.imagePath!)),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                  ),
+                  child: entry.imagePath == null || entry.imagePath!.isEmpty
+                      ? Center(
+                          child: Text(
+                            _emojiFromIndex(entry.emojiIndex),
+                            style: const TextStyle(fontSize: 32),
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                   Text(
-  entry.text,
-  maxLines: 2,
-  overflow: TextOverflow.clip,
-  textAlign: TextAlign.center, 
-  style: TextStyle(
-    color: textColor,
-    fontWeight: FontWeight.w500,
-
-    fontSize: 17,
-    fontFamily: 'PlaypenSansArabic'
-  ),
-),
-
-                    const SizedBox(height: 6),
+                    Text(
+                      entry.text,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            height: 1.2,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
+                        Icon(
+                          Icons.calendar_today_outlined,
+                          size: 14,
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.color
+                              ?.withOpacity(0.6),
+                        ),
+                        const SizedBox(width: 4),
                         Text(
                           '${entry.date.day}/${entry.date.month}/${entry.date.year}',
-                          style: TextStyle(
-                            color: secondaryTextColor,
-                            fontSize: 14,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.color
+                                        ?.withOpacity(0.6),
+                                  ),
                         ),
                         const Spacer(),
-                        IconButton(
-                icon: const Icon(Icons.delete_outline,
-                    size: 30, color: Colors.redAccent),
-                onPressed: onDelete,
-              ),
+                        if (entry.imagePath != null &&
+                            entry.imagePath!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              _emojiFromIndex(entry.emojiIndex),
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                          ),
                       ],
                     ),
                   ],
                 ),
               ),
-
-             
-              
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                onPressed: onDelete,
+              ),
             ],
           ),
         ),

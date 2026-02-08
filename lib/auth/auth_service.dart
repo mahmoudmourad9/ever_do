@@ -22,10 +22,7 @@ class AuthService {
 
       final bool didAuthenticate = await _auth.authenticate(
         localizedReason: 'قم بالتوثيق للوصول إلى اليوميات',
-        options: const AuthenticationOptions(
-          biometricOnly: true,
-          stickyAuth: true,
-        ),
+        biometricOnly: true, // خليها true لو عايز بس البصمة/الوجه
       );
 
       return didAuthenticate;

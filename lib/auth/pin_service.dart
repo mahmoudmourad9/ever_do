@@ -17,7 +17,27 @@ class PinService {
     return saved != null && saved == pin;
   }
 
+  static const String _qaKey = 'diary_security_qa'; // Format: "Question|Answer"
+
+  Future<void> saveSecurityQA(String question, String answer) async {
+    await _storage.write(key: _qaKey, value: '$question|$answer');
+  }
+
+  Future<Map<String, String>?> getSecurityQA() async {
+    final data = await _storage.read(key: _qaKey);
+    if (data == null || !data.contains('|')) return null;
+    final parts = data.split('|');
+    return {'question': parts[0], 'answer': parts[1]};
+  }
+
+  Future<bool> verifySecurityAnswer(String answer) async {
+    final qa = await getSecurityQA();
+    if (qa == null) return false;
+    return qa['answer']?.trim().toLowerCase() == answer.trim().toLowerCase();
+  }
+
   Future<void> deletePin() async {
     await _storage.delete(key: _key);
+    await _storage.delete(key: _qaKey);
   }
 }

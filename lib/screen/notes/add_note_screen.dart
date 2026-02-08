@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:everdo_app/Providers/theme_provide.dart';
+import 'package:everdo_app/Providers/theme_provider.dart';
+import 'package:everdo_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
@@ -30,12 +31,15 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   }
 
   void _save() async {
-    if (_titleController.text.isEmpty || _textController.text.isEmpty) {
+    if (_titleController.text.isEmpty && _textController.text.isEmpty) {
+      Navigator.pop(context);
       return;
     }
     final Map<String, dynamic> newNote = {
       'date': _date.millisecondsSinceEpoch,
-      'title': _titleController.text.trim(),
+      'title': _titleController.text.trim().isEmpty
+          ? 'بدون عنوان'
+          : _titleController.text.trim(),
       'text': _textController.text.trim(),
     };
 
@@ -59,120 +63,116 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDarkMode = themeProvider.isDarkMode;
-
-    final Color primaryTextColor =
+    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
+    final primaryTextColor =
         Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
-    final Color inputFillColor =
-        isDarkMode ? Colors.grey.shade800 : Colors.black12;
-const buttonColor = Color(0xFF004A63);
+    final secondaryTextColor = isDark ? Colors.white54 : Colors.black54;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: buttonColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(
-            widget.initialNote != null ? 'تعديل ملاحظة' : 'إضافة ملاحظة',
-            style: TextStyle(color: Colors.white)),
-        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
+          icon: Icon(Icons.arrow_back_ios_new, color: primaryTextColor),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            onPressed: _save,
+            icon: Icon(Icons.check,
+                size: 30, color: Theme.of(context).primaryColor),
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: isDark
+                ? [IceColors.backgroundNight, const Color(0xFF001018)]
+                : [const Color(0xFFEAF9FC), Colors.white],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('${_date.day} / ${_date.month} / ${_date.year}',
+                // Date Pill
+                GestureDetector(
+                  onTap: _pickDate,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${_date.day}/${_date.month}/${_date.year}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Title Input
+                TextField(
+                  controller: _titleController,
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: primaryTextColor,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'العنوان',
+                    hintTextDirection: TextDirection.rtl,
+                    hintStyle: TextStyle(
+                      color: secondaryTextColor.withOpacity(0.5),
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Content Input
+                Expanded(
+                  child: TextField(
+                    controller: _textController,
+                    textDirection: TextDirection.rtl,
+                    maxLines: null,
+                    expands: true,
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 18,
+                      height: 1.5,
                       color: primaryTextColor,
-                    )),
-                CircleAvatar(
-                  backgroundColor: const Color(0xFF006C8D),
-                  child: IconButton(
-                      icon: const Icon(Icons.calendar_month,
-                          color:Colors.white),
-                      onPressed: _pickDate),
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'ابدأ الكتابة هنا...',
+                      hintTextDirection: TextDirection.rtl,
+                      hintStyle: TextStyle(
+                        color: secondaryTextColor.withOpacity(0.4),
+                        fontSize: 18,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 25),
-            Text('عنوان الملاحظة',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: primaryTextColor)),
-            const SizedBox(height: 10),
-            TextField(
-  controller: _titleController,
-  textDirection: TextDirection.rtl,
-  style: TextStyle(color: primaryTextColor),
-  decoration: InputDecoration(
-    hintText: 'اكتب العنوان هنا',
-     hintTextDirection: TextDirection.rtl,
-    hintStyle: TextStyle(
-      color: isDarkMode ? Colors.grey : Colors.black38,
-    ),
-    filled: true,
-    fillColor: inputFillColor,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: BorderSide.none,
-    ),
-  ),
-),
-
-            const SizedBox(height: 25),
-            Text('المحتوى',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: primaryTextColor)),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _textController,
-               textDirection: TextDirection.rtl,
-              maxLines: 8,
-              style: TextStyle(color: primaryTextColor),
-              decoration: InputDecoration(
-                hintText: 'اكتب ملاحظتك هنا...',
-                hintTextDirection: TextDirection.rtl,
-                hintStyle:
-                    TextStyle(color: isDarkMode ? Colors.grey : Colors.black38),
-                filled: true,
-                fillColor: inputFillColor,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none),
-              ),
-            ),
-            const SizedBox(height: 25),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                ),
-                onPressed: _save,
-                child: const Text('حفظ',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ]),
+          ),
         ),
       ),
     );
@@ -189,11 +189,8 @@ const buttonColor = Color(0xFF004A63);
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
               primary: Theme.of(context).primaryColor,
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).primaryColor,
-              ),
+              onPrimary: Colors.white,
+              surface: Theme.of(context).cardColor,
             ),
           ),
           child: child!,
