@@ -36,7 +36,7 @@ class NotesScreenState extends State<NotesScreen> {
             icon: Icon(Theme.of(context).brightness == Brightness.dark
                 ? Icons.light_mode
                 : Icons.dark_mode),
-            onPressed: widget.onThemeChanged as void Function()?,
+            onPressed: () => widget.onThemeChanged(!isDark),
           ),
           IconButton(
             icon: const Icon(Icons.settings),
